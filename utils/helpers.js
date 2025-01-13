@@ -1,0 +1,2 @@
+// hash password 
+//generate token
