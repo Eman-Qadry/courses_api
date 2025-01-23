@@ -1,12 +1,18 @@
 const mongoose=require('mongoose');
 
 const playlistSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    title: { type: String, required: true },
     url: { type: String, required: true, unique: true },
-    imageUrl: { type: String },
+    description:{type: String},
+    thumbnailUrl: { type: String },
     numberOfVideos: { type: Number, default: 0 },
-    totalHours: { type: Number, default: 0 },
+    totalHours: { type: Object, default: {}},
     isRecommended: { type: Boolean, default: false },
+    video:[{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Video'
+    }],
+    lastChecked: { type: Date, default: Date.now }, 
+    isValid: { type: Boolean, default: true },
     topicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic' },
 });
 

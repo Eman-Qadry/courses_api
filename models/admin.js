@@ -18,7 +18,7 @@ const adminSchema= new mongoose.Schema({
 });
 
 adminSchema.methods.correctpasssword= async function (enteredpassword,adminpassword){
-    return await bcrypt.compare(userpassword,enteredpassword);
+    return await bcrypt.compare(adminpassword,enteredpassword);
    };
    
    adminSchema.methods.createResetToken= function(){

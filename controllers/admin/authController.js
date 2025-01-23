@@ -1,6 +1,6 @@
 const Admin=require('../../models/admin');
 const createJWT=require('../../config/JWT');
-
+const bcrypt=require('bcryptjs')
 // admin loggin
 exports.postlogin=async (req,res,next)=>{
     const email=req.body.email;
@@ -61,3 +61,27 @@ exports.resetpassword=async (req,res,next)=>{
    });
  
  };
+
+ exports.postsignup=async(req,res,next)=>{
+
+ const email=req.body.email;
+ const password=req.body.password;
+ 
+  const admin= await Admin.findOne({email:email});
+  
+  
+  const hashedpassword= await bcrypt.hash(password,12);
+
+ 
+      const newAdmin=new Admin({
+          
+          email:email,
+          password:hashedpassword,
+         
+         });
+         await newAdmin.save();
+    
+     res.status(200).json("admin created successfully");
+        }
+ 
+ 

@@ -2,20 +2,27 @@ const Topic=require('../../models/topic');
 
 exports.createTopic=async(req,res,next)=>{
 const name=req.body.name;
+const existedTopic= await Topic.findOne({name:name});
+if (existedTopic){
+   return res.status(400).json("topic existed already");
+}
 const topic=new Topic({
     name:name
 })
  const saved =await topic.save();
  if (!saved){
-    const err=new Error ('error in saving the topic,try again!');
-    err.statusCode=500;
-    next(err);
+    res
+    .status(500)
+    .json('topic not created',);
  }
  else {
     res
-    .satus(200)
-    .json('topic created successfully',{
-        topic:saved
+    .status(200)
+    .json({
+        message:'topic created successfully',
+        data:{
+            topic:saved
+        }
     });
  }
 };
@@ -35,7 +42,8 @@ exports.getTopics=async(req,res,next)=>{
     else {
         res
         .status(200)
-        .json('this is the topics ', {
+        .json({
+            message:'this is the topics ', 
             topics:topics
         })
     }
@@ -43,7 +51,7 @@ exports.getTopics=async(req,res,next)=>{
 
 exports.renameTopic=async(req,res,next)=>{
     const newName=req.body.newname;
-    const topicId=req.params.topicId;
+    const topicId=req.body.topicId;
     const topic=await Topic.findById(topicId);
     if (!topic){
         const err=new Error ('topic not exists,try again!');
@@ -59,16 +67,14 @@ exports.renameTopic=async(req,res,next)=>{
  }
  else {
     res
-    .satus(200)
-    .json('topic renamed successfully',{
-        topic:saved
-    });
+    .status(200)
+    .json('topic renamed successfully');
  }
     
 }
 
 exports.deleteTopic=async(req,res,next)=>{
-    const topicId=req.params.topicId;
+    const topicId=req.query.topicId;
     const topic=await Topic.findById(topicId);
     if (!topic){
         const err=new Error ('topic not exists,try again!');
