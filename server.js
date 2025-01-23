@@ -22,6 +22,9 @@ app.use('/admin/auth',authRouter);
 app.use('/admin/topics',topicRouter);
 app.use('/admin/videos',vidrouter);
 app.use('/admin/playLists',playListRoute);
+app.get('/',(req,res,next)=>{
+    res.status(200).json("welcome to the server")
+})
 app.listen('6000',()=>{
     connectDB();
     console.log("server is started");
