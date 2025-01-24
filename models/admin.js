@@ -17,9 +17,12 @@ const adminSchema= new mongoose.Schema({
       createdAt: { type: Date, default: Date.now() }
 });
 
-adminSchema.methods.correctpasssword= async function (enteredpassword,adminpassword){
-    return await bcrypt.compare(adminpassword,enteredpassword);
-   };
+adminSchema.methods.correctpasssword = async function (enteredpassword, adminpassword) {
+  const res= await bcrypt.compare(enteredpassword, adminpassword);
+
+  return res;
+};
+
    
    adminSchema.methods.createResetToken= function(){
    

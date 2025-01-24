@@ -11,7 +11,8 @@ exports.postlogin=async (req,res,next)=>{
      .status(404)
      .json('could not find admin with this email , you can try to sign up');
   }
-  const isEqualPassword=admin.correctpasssword(password,admin.password);
+  const isEqualPassword= await admin.correctpasssword(password,admin.password);
+  
   if (isEqualPassword){
     // create json web token
    const token= createJWT(admin._id);
