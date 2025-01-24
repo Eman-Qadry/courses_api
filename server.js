@@ -8,13 +8,7 @@ const playListRoute=require('./routes/admin/playListRoute');
 const topicRouter=require('./routes/admin/topicRouter');
 const cors = require('cors');
 
-app.use(
-  cors({
-    origin: '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+
 
 
 dotenv.config();
@@ -22,6 +16,13 @@ const app=express();
 app.use(bodyparser.urlencoded({extended:true}));
 app.use(bodyparser.json());
 
+app.use(
+  cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.options('*', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
