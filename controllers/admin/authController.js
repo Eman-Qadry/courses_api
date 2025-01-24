@@ -1,28 +1,30 @@
 const Admin=require('../../models/admin');
 const createJWT=require('../../config/JWT');
-const bcrypt=require('bcryptjs')
+const bcrypt=require('bcrypt')
 // admin loggin
 exports.postlogin=async (req,res,next)=>{
     const email=req.body.email;
     const password=req.body.password;
   const admin=  await Admin.findOne({email:email});
   if (!admin){
-    res
+   return  res
      .status(404)
      .json('could not find admin with this email , you can try to sign up');
   }
+  console.log(admin.password)
+  console.log(password)
   const isEqualPassword= await admin.correctpasssword(password,admin.password);
   
   if (isEqualPassword){
     // create json web token
    const token= createJWT(admin._id);
-    res
+  return  res
     .status(200)
     .json({message:'admin loged in successfully', data:{token:token, adminId:admin._id}});
 }
 else {
-    res
-    .status(200)
+    return res
+    .status(500)
     .json('admin password is not correct');
 }
 }
@@ -69,7 +71,9 @@ exports.resetpassword=async (req,res,next)=>{
  const password=req.body.password;
  
   const admin= await Admin.findOne({email:email});
-  
+  if (admin){
+    return  res.status(500).json("admin already signed up try to logg in");
+  }
   
   const hashedpassword= await bcrypt.hash(password,12);
 
@@ -82,7 +86,7 @@ exports.resetpassword=async (req,res,next)=>{
          });
          await newAdmin.save();
     
-     res.status(200).json("admin created successfully");
+    return  res.status(200).json("admin created successfully");
         }
  
  

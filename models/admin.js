@@ -1,5 +1,5 @@
 const mongoose=require('mongoose');
-const bcrypt=require('bcryptjs');
+const bcrypt=require('bcrypt');
 const crypto=require('crypto');
 const adminSchema= new mongoose.Schema({
     email:{
@@ -19,7 +19,7 @@ const adminSchema= new mongoose.Schema({
 
 adminSchema.methods.correctpasssword = async function (enteredpassword, adminpassword) {
   const res= await bcrypt.compare(enteredpassword, adminpassword);
-
+  console.log(res);
   return res;
 };
 
@@ -33,11 +33,5 @@ adminSchema.methods.correctpasssword = async function (enteredpassword, adminpas
    return resetToken;
    };
    
-   adminSchema.pre('save',async function(next){
-     if (!this.isModified('password'))
-       return next();
-     const salt= await bcrypt.genSalt(12);
-      this.password= await bcrypt.hash(this.password,salt);
-      next();
-   });
+  
 module.exports=mongoose.model('Admin',adminSchema);
