@@ -1,6 +1,7 @@
 const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 const crypto=require('crypto');
+
 const adminSchema= new mongoose.Schema({
     email:{
         type:String,
@@ -13,7 +14,7 @@ const adminSchema= new mongoose.Schema({
 
     },
     passwordResetToken:{  type: String},
-    tokenExpiration:{ type:Date},
+    resetTokenExpiration:{ type:Date},
       createdAt: { type: Date, default: Date.now() }
 });
 

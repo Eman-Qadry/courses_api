@@ -1,218 +1,261 @@
 const express = require("express");
-const axios = require("axios");
-const bcrypt = require('bcrypt');
-const Video=require('../../models/video');
-const Topic=require('../../models/topic');
-const playlist=require('../../models/playlist');
-const { fetchVideoDetails, fetchPlaylistDetails } = require('../../services/youtubeService');
+const Video = require("../../models/video");
+const Topic = require("../../models/topic");
+const { fetchVideoDetails } = require("../../services/youtubeService");
 
-exports.addvideo=async function (req,res,next) {
-  const { url, topicName } = req.body;
-const existedVideo=await Video.findOne({url:url});
-if (existedVideo)
-  return res.status(400).json({ error: "video is existed already" });
+exports.addVideos = async function (req, res, next) {
+  const { videos } = req.body;
 
-  if (!url  || !topicName) {
-    return res.status(400).json({ error: "URL ,topicName and type are required." });
-  }
-const topic =await Topic.findOne({name:topicName});
-if (!topic){
-    return res.status(404).json({ error: "the topic not found." });
+  if (!Array.isArray(videos) || videos.length === 0) {
+    return res.status(400).json({ error: "An array of videos is required." });
   }
 
-  
-    const videoDetails= await fetchVideoDetails(url);
-    if (JSON.stringify(videoDetails) === '{}'){
-      res.status("404").json("Not existed url yet");
+  const addedVideos = [];
+  const errors = [];
+
+  for (const videoData of videos) {
+    const { url, topicName } = videoData;
+
+    try {
+      // Check if video already exists
+      const existedVideo = await Video.findOne({ url });
+      if (existedVideo) {
+        errors.push({ url, error: "Video already exists." });
+        continue;
+      }
+
+      // Check if topic exists
+      const topic = await Topic.findOne({ name: topicName });
+      if (!topic) {
+        errors.push({ url, error: `Topic ${topicName} not found.` });
+        continue;
+      }
+
+      // Fetch video details
+      const videoDetails = await fetchVideoDetails(url);
+      if (JSON.stringify(videoDetails) === "{}") {
+        errors.push({ url, error: "Invalid or non-existent URL." });
+        continue;
+      }
+
+      // Save video
+      const video = new Video({
+        title: videoDetails.title,
+        url,
+        description: videoDetails.description,
+        thumbnailUrl: videoDetails.thumbnailUrl,
+        isActive: true,
+        totalHours: videoDetails.duration,
+        topicId: topic._id,
+      });
+
+      const newVideo = await video.save();
+      topic.video.push(newVideo._id);
+      await topic.save();
+
+      addedVideos.push(newVideo);
+    } catch (error) {
+      errors.push({ url, error: error.message });
     }
-    const video= new Video({
-        title:videoDetails.title,
-        url:url,
-        description:videoDetails.description,
-        thumbnailUrl:videoDetails.thumbnailUrl,
-        isActive:true,
-        totalHours:videoDetails.duration,
-        topicId:topic._id
+  }
 
+  res.status(200).json({ message: "Processing complete.", addedVideos, errors });
+};
+
+exports.activateVideos = async function (req, res, next) {
+  const { videoIds } = req.body;
+
+  if (!Array.isArray(videoIds) || videoIds.length === 0) {
+    return res.status(400).json({ error: "An array of video IDs is required." });
+  }
+
+  const updatedVideos = [];
+  const errors = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findByIdAndUpdate(videoId, { isActive: true }, { new: true });
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      updatedVideos.push(video);
+    } catch (error) {
+      errors.push({ videoId, error: error.message });
+    }
+  }
+
+  res.status(200).json({ message: "Processing complete.", updatedVideos, errors });
+};
+
+exports.deactivateVideos = async function (req, res, next) {
+  const { videoIds } = req.body;
+
+  if (!Array.isArray(videoIds) || videoIds.length === 0) {
+    return res.status(400).json({ error: "An array of video IDs is required." });
+  }
+
+  const updatedVideos = [];
+  const errors = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findByIdAndUpdate(videoId, { isActive: false }, { new: true });
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      updatedVideos.push(video);
+    } catch (error) {
+      errors.push({ videoId, error: error.message });
+    }
+  }
+
+  res.status(200).json({ message: "Processing complete.", updatedVideos, errors });
+};
+
+exports.deleteVideos = async function (req, res, next) {
+  const { videoIds } = req.body;
+
+  if (!Array.isArray(videoIds) || videoIds.length === 0) {
+    return res.status(400).json({ error: "An array of video IDs is required." });
+  }
+
+  const deletedVideos = [];
+  const errors = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findByIdAndDelete(videoId);
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      deletedVideos.push(videoId);
+    } catch (error) {
+      errors.push({ videoId, error: error.message });
+    }
+  }
+
+  res.status(200).json({ message: "Processing complete.", deletedVideos, errors });
+};
+
+exports.recommendVideos = async function (req, res, next) {
+  const { videoIds } = req.body;
+
+  if (!Array.isArray(videoIds) || videoIds.length === 0) {
+    return res.status(400).json({ error: "An array of video IDs is required." });
+  }
+
+  const recommendedVideos = [];
+  const errors = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findByIdAndUpdate(videoId, { isRecommended: true }, { new: true });
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      recommendedVideos.push(video);
+    } catch (error) {
+      errors.push({ videoId, error: error.message });
+    }
+  }
+
+  res.status(200).json({ message: "Processing complete.", recommendedVideos, errors });
+};
+
+exports.notRecommendVideos = async function (req, res, next) {
+  const { videoIds } = req.body;
+
+  if (!Array.isArray(videoIds) || videoIds.length === 0) {
+    return res.status(400).json({ error: "An array of video IDs is required." });
+  }
+
+  const notRecommendedVideos = [];
+  const errors = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findByIdAndUpdate(videoId, { isRecommended: false }, { new: true });
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      notRecommendedVideos.push(video);
+    } catch (error) {
+      errors.push({ videoId, error: error.message });
+    }
+  }
+
+  res.status(200).json({ message: "Processing complete.", notRecommendedVideos, errors });
+};
+
+
+exports.getVideos = async function (req, res, next) {
+  try {
+    const { 
+      topicId, 
+      isActive, 
+      isRecommended, 
+      hasThumbnail, 
+      deactivated, 
+      page = 1, 
+      limit = 25 
+    } = req.query;
+
+    // Build a query object dynamically
+    const query = {};
+
+    // Filter by topicId if provided
+    if (topicId) {
+      query.topicId = topicId;
+    }
+
+    // Filter by isActive (true/false)
+    if (typeof isActive !== 'undefined') {
+      query.isActive = isActive === 'true';
+    }
+
+    // Filter by isRecommended (true/false)
+    if (typeof isRecommended !== 'undefined') {
+      query.isRecommended = isRecommended === 'true';
+    }
+
+    // Filter videos with or without thumbnails
+    if (typeof hasThumbnail !== 'undefined') {
+      if (hasThumbnail === 'true') {
+        query.thumbnailUrl = { $exists: true, $ne: null }; // Videos with a thumbnail
+      } else if (hasThumbnail === 'false') {
+        query.thumbnailUrl = { $exists: false }; // Videos without a thumbnail
+      }
+    }
+
+    // Special filter for deactivated videos
+    if (typeof deactivated !== 'undefined') {
+      query.isActive = deactivated === 'true' ? false : true;
+    }
+
+   
+
+    // Fetch videos with filtering, pagination, and populate topic & playlist details
+    const videos = await Video.find(query)
+     
+      .populate("topicId", "name") // Include only the topic name
+      .populate("listId", "name"); // Include only the playlist name
+
+    // Fetch total count for pagination
+    const totalVideos = await Video.countDocuments(query);
+
+    res.status(200).json({
+      message: "Videos fetched successfully.",
+      data: videos,
+      total: totalVideos,
+     
     });
-    const newvideo= await video.save();
-    if (!newvideo){
-        return res.status(500).json({ error: "can not save the video" });
-      }
-    topic.video.push(newvideo._id);
-    const savedTopic= await topic.save();
-    if (!savedTopic){
-        return res.status(500).json({ error: "can not save the topic" });
-      }
-      return res.status(200).json({ message: "video data",newvideo });
-  }
-
-
-
-// Function to check if the video is still available on YouTube
-exports.checkVideoAvailability = async function (req, res,next)  {
-  const { url } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: "URL is required." });
-  }
-
-  try {
-    // Fetch video details from YouTube API
-    const videoDetails = await fetchVideoDetails(url);
-
-    if (!videoDetails) {
-      return res.status(404).json({ error: "Video not found or deleted on YouTube." });
-    }
-
-    return res.status(200).json({ message: "Video is available", video: videoDetails });
   } catch (error) {
-    return res.status(500).json({ error: "Error fetching video details from YouTube." });
+    console.error("Error fetching videos:", error);
+    res.status(500).json({ error: "Error fetching videos.", details: error.message });
   }
 };
-
-
-
-
-exports.activateVideo = async function(req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { isActive: true },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video activated successfully.", video });
-  } catch (error) {
-    return res.status(500).json({ error: "Error activating video.", details: error.message });
-  }
-};
-exports.deactivateVideo = async function(req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { isActive: false },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video deactivated successfully.", video });
-  } catch (error) {
-    return res.status(500).json({ error: "Error deactivating video.", details: error.message });
-  }
-};
-
-exports.deleteVideo = async function (req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndDelete(videoId);
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video deleted successfully." });
-  } catch (error) {
-    return res.status(500).json({ error: "Error deleting video.", details: error.message });
-  }
-};
-exports.recommendVideo = async function (req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { isRecommended: true },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video marked as recommended successfully.", video });
-  } catch (error) {
-    return res.status(500).json({ error: "Error marking video as recommended.", details: error.message });
-  }
-};
-
-exports.notRecommendVideo = async function (req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { isRecommended: false },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video marked as Not recommended successfully.", video });
-  } catch (error) {
-    return res.status(500).json({ error: "Error marking video as recommended.", details: error.message });
-  }
-};
-
-exports.favouriteVideo = async function (req, res,next)  {
-  const { videoId } = req.query;
-
-  if (!videoId) {
-    return res.status(400).json({ error: "Video ID is required." });
-  }
-
-  try {
-    const video = await Video.findByIdAndUpdate(
-      videoId,
-      { favourite: true},
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ error: "Video not found." });
-    }
-
-    return res.status(200).json({ message: "Video added to favourite list successfully.", video });
-  } catch (error) {
-    return res.status(500).json({ error: "Error marking video favourite.", details: error.message });
-  }
-};
-  exports.getVideos=async function (req,res,next){
-const videos=await Video.find();
-return res.status(200).json({ message: "all Videos are.", videos });
-
-  }

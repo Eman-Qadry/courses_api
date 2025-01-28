@@ -1,94 +1,159 @@
-const Topic=require('../../models/topic');
+const Topic = require('../../models/topic');
 
-exports.createTopic=async(req,res,next)=>{
-const name=req.body.name;
-const existedTopic= await Topic.findOne({name:name});
-if (existedTopic){
-   return res.status(400).json("topic existed already");
-}
-const topic=new Topic({
-    name:name
-})
- const saved =await topic.save();
- if (!saved){
-    res
-    .status(500)
-    .json('topic not created',);
- }
- else {
-    res
-    .status(200)
-    .json({
-        message:'topic created successfully',
-        data:{
-            topic:saved
-        }
+exports.createTopic = async (req, res) => {
+  const name = req.body.name;
+  
+  // Validate input
+  if (!name || typeof name !== 'string' || name.trim() === "") {
+    return res.status(400).json({
+      message: "Topic name must be a non-empty string.",
+      data: {}
     });
- }
-};
+  }
 
-exports.getTopics=async(req,res,next)=>{
-    const topics= await Topic.find();
-    if (!topics){
-        const err=new Error ('error in getting topics,try again!');
-    err.statusCode=500;
-    next(err);
+  try {
+    const existedTopic = await Topic.findOne({ name: name });
+    if (existedTopic) {
+      return res.status(400).json({
+        message: "Topic already exists.",
+        data: {}
+      });
     }
-    if (topics.length==0){
-        res
-        .status(400)
-        .json('there is no topics yet, try to create one')
-    }
-    else {
-        res
-        .status(200)
-        .json({
-            message:'this is the topics ', 
-            topics:topics
-        })
-    }
-};
 
-exports.renameTopic=async(req,res,next)=>{
-    const newName=req.body.newname;
-    const topicId=req.body.topicId;
-    const topic=await Topic.findById(topicId);
-    if (!topic){
-        const err=new Error ('topic not exists,try again!');
-    err.statusCode=500;
-    next(err);
-    }
-    topic.name=newName;
-   const savedTopic= await topic.save();
-   if (!savedTopic){
-    const err=new Error ('error in saving the topic,try again!');
-    err.statusCode=500;
-    next(err);
- }
- else {
-    res
-    .status(200)
-    .json('topic renamed successfully');
- }
+    const topic = new Topic({ name });
+    const saved = await topic.save();
     
-}
-
-exports.deleteTopic=async(req,res,next)=>{
-    const topicId=req.query.topicId;
-    const topic=await Topic.findById(topicId);
-    if (!topic){
-        const err=new Error ('topic not exists,try again!');
-    err.statusCode=500;
-    next(err);
+    if (!saved) {
+      return res.status(500).json({
+        message: "Topic not created.",
+        data: {}
+      });
     }
- const deleted=   await Topic.deleteOne(topic);
- if (!deleted){
-    const err=new Error ('error in deleting topic');
-    err.statusCode=500;
-    next(err);
- }
- res
- .status(200)
- .json('topic is deleted successfully')
 
-}
+    return res.status(200).json({
+      message: "Topic created successfully.",
+      data: { topic: saved }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while creating the topic.",
+      data: { error: error.message }
+    });
+  }
+};
+
+exports.getTopics = async (req, res) => {
+  try {
+    const topics = await Topic.find();
+    if (!topics || topics.length === 0) {
+      return res.status(400).json({
+        message: 'There are no topics yet, try creating one.',
+        data: {}
+      });
+    }
+
+    return res.status(200).json({
+      message: 'These are the topics.',
+      topics: topics
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Error occurred while fetching topics.',
+      data: { error: error.message }
+    });
+  }
+};
+
+exports.renameTopic = async (req, res) => {
+  const { newname, topicId } = req.body;
+
+  // Validate input
+  if (!newname || typeof newname !== 'string' || newname.trim() === "") {
+    return res.status(400).json({
+      message: "New topic name must be a non-empty string.",
+      data: {}
+    });
+  }
+
+  if (!topicId || typeof topicId !== 'string') {
+    return res.status(400).json({
+      message: "Topic ID must be a valid string.",
+      data: {}
+    });
+  }
+
+  try {
+    const topic = await Topic.findById(topicId);
+    if (!topic) {
+      return res.status(400).json({
+        message: 'Topic does not exist.',
+        data: {}
+      });
+    }
+
+    topic.name = newname;
+    const savedTopic = await topic.save();
+    
+    if (!savedTopic) {
+      return res.status(500).json({
+        message: 'Error occurred while renaming the topic.',
+        data: {}
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Topic renamed successfully.',
+      data: {savedTopic}
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Error occurred while renaming the topic.',
+      data: { error: error.message }
+    });
+  }
+};
+
+exports.deleteTopic = async (req, res) => {
+  const { topicId } = req.query;
+
+  // Validate input
+  if (!topicId || typeof topicId !== 'string') {
+    return res.status(400).json({
+      message: "Topic ID must be a valid string.",
+      data: {}
+    });
+  }
+
+  try {
+    const topic = await Topic.findById(topicId);
+    if (!topic) {
+      return res.status(400).json({
+        message: 'Topic does not exist.',
+        data: {}
+      });
+    }
+
+    const deleted = await Topic.deleteOne({ _id: topicId });
+    
+    if (!deleted) {
+      return res.status(500).json({
+        message: 'Error occurred while deleting the topic.',
+        data: {}
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Topic deleted successfully.',
+      data: {}
+    });
+  } catch (error) {
+   
+    return res.status(500).json({
+      message: 'Error occurred while deleting the topic.',
+      data: { error: error.message }
+    });
+  }
+};
