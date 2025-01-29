@@ -40,12 +40,10 @@ Adds a list of videos to the system.
 **Request Body:**
 ```json
 {
-  "videos": [
-    {
-      "url": "https://video.url",
-      "topicName": "JavaScript Basics"
-    }
-  ]
+  "videos": ["https://youtu.be/C9mkzzAevzc?si=Vf19BSfx0l1Ju3Kg","https://youtu.be/encVmPEDy2k?si=j36RdU-ClU3LvaAt"],
+      "topicName": "animat"
+    
+  
 }
 ```
 **Responses:**
@@ -54,26 +52,20 @@ Adds a list of videos to the system.
     "message": "Processing complete.",
     "addedVideos": [
         {
-            "title": "فاهم 55 | سلسلة لازم تتحرر - (2) التحرر من التفاهة | مع الشيخ/ أمجد سمير",
-            "url": "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x",
-            "thumbnailUrl": "https://i.ytimg.com/vi/DdxrQV_bkkY/hqdefault.jpg",
-            "isActive": true,
-            "favourite": false,
-            "totalHours": {
-                "hours": 1,
-                "minutes": 46,
-                "seconds": 23
-            },
-            "description": " ",
-            "isRecommended": false,
-            "topicId": "678ca02e5534b03c819d2656",
-            "isValid": true,
-            "_id": "67994db995f612744c36093d",
-            "lastChecked": "2025-01-28T21:35:53.550Z",
-            "__v": 0
+            "title": "ما تغلطش غلطتي! 10 نصائح للمبتدئين في البرمجة",
+            "videoId": "679abc2f26759de7ef024acd"
         }
     ],
-    "errors": []
+    "errors": [
+        {
+            "url": "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x",
+            "error": "Video already exists."
+        },
+        {
+            "url": "https://youtu.be/C9mkzzAevzc?si=Vf19BSfx0l1Ju3Kg",
+            "error": "Video already exists."
+        }
+    ]
 }
 - `400 Bad Request` - Missing or invalid input data.
 {
@@ -401,7 +393,34 @@ Fetches videos based on filters
 - `500 Internal Server Error` - Error during video retrieval.
 
 ---
+#### **check availability**
+`POST /api/v1/admin/videos/isAvailable`
 
+
+**Request Body:**
+```json
+{
+    "videos":[
+       "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x"]
+}
+```
+**Responses:**
+- `200 OK` - 
+{
+    "message": "Video availability check completed.",
+    "availableVideos": [
+        {
+            "url": "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x",
+            "title": "فاهم 55 | سلسلة لازم تتحرر - (2) التحرر من التفاهة | مع الشيخ/ أمجد سمير"
+        }
+    ],
+    "notAvailableVideos": []
+}
+- `400 Bad Request` - Missing or invalid input data.
+
+- `500 Internal Server Error` - Error during video processing.
+
+---
 ## Dependencies
 This module relies on:
 - **Mongoose** - For MongoDB interaction.

@@ -102,7 +102,7 @@ const fetchPlaylistDetails = async function (url) {
         const videoId = item.contentDetails.videoId;
         
         const videoDetails = await fetchVideoDetails(`https://www.youtube.com/watch?v=${videoId}`);
-        console.log(videoDetails)
+       
         if (JSON.stringify(videoDetails) === '{}'){
           continue
         }
@@ -115,7 +115,7 @@ const fetchPlaylistDetails = async function (url) {
           videoThumbnail: videoDetails.thumbnailUrl,
           duration: videoDetails.duration,
         });
-        console.log(videoDetails.duration)
+       
         totalDuration.hours+=videoDetails.duration.hours;
         totalDuration.minutes+=videoDetails.duration.minutes;
         totalDuration.seconds+=videoDetails.duration.seconds

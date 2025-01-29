@@ -3,7 +3,7 @@ var decodedToken;
 const isAuth=(req,res,next)=>{
     const Authheader= req.get('Authorization');
     if (!Authheader){
-      res.status(401).json({message:"un aurhorized user"})
+       return res.status(401).json({message:"un aurhorized user"})
     }
     const token =Authheader.split(' ')[1];
     try {
@@ -11,10 +11,10 @@ const isAuth=(req,res,next)=>{
       
       
       } catch (error) {
-       res.status(401).json({message:"un aurhorized user"})
+     return   res.status(401).json({message:"un aurhorized user"})
       }
       if (!decodedToken) {
-        res.status(401).json({message:"un aurhorized user"})
+       return res.status(401).json({message:"un aurhorized user"})
     }
     req.adminId = decodedToken._id;
     next();

@@ -4,17 +4,18 @@ const Topic = require("../../models/topic");
 const { fetchVideoDetails } = require("../../services/youtubeService");
 
 exports.addVideos = async function (req, res, next) {
-  const { videos } = req.body;
+  const { videos,topicName  } = req.body;
 
-  if (!Array.isArray(videos) || videos.length === 0) {
-    return res.status(400).json({ error: "An array of videos is required." });
+
+  if (!Array.isArray(videos) || videos.length === 0 || !topicName) {
+    return res.status(400).json({ error: "URLs array and topicName are required." });
   }
 
   const addedVideos = [];
   const errors = [];
 
-  for (const videoData of videos) {
-    const { url, topicName } = videoData;
+  for (const url of videos) {
+
 
     try {
       // Check if video already exists
@@ -53,7 +54,7 @@ exports.addVideos = async function (req, res, next) {
       topic.video.push(newVideo._id);
       await topic.save();
 
-      addedVideos.push(newVideo);
+      addedVideos.push({title:newVideo.title , videoId: newVideo._id});
     } catch (error) {
       errors.push({ url, error: error.message });
     }
@@ -257,5 +258,42 @@ exports.getVideos = async function (req, res, next) {
   } catch (error) {
     console.error("Error fetching videos:", error);
     res.status(500).json({ error: "Error fetching videos.", details: error.message });
+  }
+};
+
+
+exports.videoAvailability = async (req, res) => {
+  try {
+    const { videos } = req.body;
+    
+    if (!Array.isArray(videos) || videos.length === 0) {
+      return res.status(400).json({ error: "An array of video URLs is required." });
+    }
+
+    let availableVideos = [];
+    let notAvailableVideos = [];
+
+    for (const url of videos) {
+      try {
+        // Fetch video details
+        const videoDetails = await fetchVideoDetails(url);
+        
+        if (videoDetails && Object.keys(videoDetails).length > 0) {
+          availableVideos.push({ url, title: videoDetails.title });
+        } else {
+          notAvailableVideos.push({ url, reason: "Invalid or non-existent video." });
+        }
+      } catch (error) {
+        notAvailableVideos.push({ url, reason: "Error fetching details." });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Video availability check completed.",
+      availableVideos,
+      notAvailableVideos,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };

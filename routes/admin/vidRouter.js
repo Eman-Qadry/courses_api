@@ -10,6 +10,7 @@ const {
   recommendVideosValidation,
   notRecommendVideosValidation,
   getVideosValidation,
+  availableVideosValidation
 } = require("../../validation/videoValidator");
 const { validationResult } = require("express-validator");
 
@@ -29,6 +30,14 @@ vidrouter.post(
   addVideosValidation,
   handleValidationErrors,
   vidcontroller.addVideos
+);
+
+vidrouter.post(
+  "/isAvailable",
+  authorized,
+  availableVideosValidation,
+  handleValidationErrors,
+  vidcontroller.videoAvailability
 );
 
 // Activate videos route

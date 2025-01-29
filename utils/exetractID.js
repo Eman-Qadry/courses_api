@@ -10,7 +10,7 @@
 function  extractPlaylistId (url) {
     const playlistIdRegex = /[?&]list=([a-zA-Z0-9_-]+)/;
     const match = url.match(playlistIdRegex);
-    console.log(match[1]);
+  
     return match ? match[1] : null; // Returns the playlist ID or null if not found
   }
   

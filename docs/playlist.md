@@ -30,40 +30,72 @@ The `Playlist` model represents a playlist entity with metadata and associated v
 ### Playlist Management Endpoints
 
 #### **1. Add Playlist**
-`POST /api/admin/playlists`
+`POST /api/v1/admin/playLists`
 
 Adds a new playlist and associates its videos with a topic.
 
 **Request Body:**
 ```json
 {
-  "url": "https://playlist.url",
+  "urls": "https://playlist.url",
   "topicName": "JavaScript Basics"
 }
 ```
 
 **Responses:**
 - `200 OK` - Playlist added successfully.
-- `400 Bad Request` - Missing or invalid `url` or `topicName`.
+{
+    "message": "Playlists processing completed",
+    "addedPlaylists": [
+        {
+            "url": "https://www.youtube.com/watch?v=u1q_WcJEb_8&list=PL0vtyWBHY2NVlIAgSlEWOniway9Vij6TV",
+            "title": "LeetCode Solutions"
+        }
+    ],
+    "notAddedPlaylists": [
+        {
+            "url": "https://www.youtube.com/watch?v=5i_FzxdqWc8&list=PL0vtyWBHY2NVasGHm73DXSlkrO6vxYmhz",
+            "reason": "Already exists"
+        }
+    ]
+}
+- `400 Bad Request` - Missing or invalid `url` or `topicName`. or un authorized user
+{
+    "message": "un aurhorized user"
+}
 - `404 Not Found` - Specified topic not found.
 - `500 Internal Server Error` - Error while saving playlist or associated videos.
 
 ---
 
 #### **2. Check Playlist Availability**
-`POST /api/admin/playlists/isAvailable`
+`POST /api/v1/admin/playLists/isAvailable`
 
 Checks if a playlist is still available on YouTube.
 
 **Request Body:**
 ```json
 {
-  "url": "https://playlist.url"
+  "urls": ["https://playlist.url"]
 }
 ```
 
 **Responses:**
 - `200 OK` - Playlist is available and returns details.
+{
+    "message": "Playlist availability check completed",
+    "availablePlaylists": [
+        {
+            "url": "https://www.youtube.com/watch?v=5i_FzxdqWc8&list=PL0vtyWBHY2NVasGHm73DXSlkrO6vxYmhz",
+            "title": "Crash Courses"
+        },
+        {
+            "url": "https://www.youtube.com/watch?v=u1q_WcJEb_8&list=PL0vtyWBHY2NVlIAgSlEWOniway9Vij6TV",
+            "title": "LeetCode Solutions"
+        }
+    ],
+    "notFoundPlaylists": []
+}
 - `400 Bad Request` - Missing or invalid `url`.
 - `404 Not Found` - Playlist not found or deleted on YouTube.
 - `500 Internal Server Error` - Error while checking playlist availability.
@@ -81,17 +113,12 @@ This module relies on:
 ---
 
 ## Security Considerations
-- **Input Validation:** Ensures that `url` and `topicName` are valid and sanitized before processing.
+- **Input Validation:** Ensures that `urls` and `topicName` are valid and sanitized before processing.
 - **Error Handling:** Provides descriptive error messages for all edge cases.
 - **YouTube API Interaction:** Validates data fetched from external services to avoid inconsistencies.
 
 ---
 
-## Future Enhancements
-- Add bulk playlist addition functionality.
-- Implement advanced playlist filters (e.g., duration, number of videos, etc.).
-- Integrate user-specific playlist recommendations.
-- Add functionality to handle private playlists with authentication.
 
----
+
 
