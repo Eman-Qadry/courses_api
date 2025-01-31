@@ -52,7 +52,32 @@ exports.addVideos = async function (req, res, next) {
 
       const newVideo = await video.save();
       topic.video.push(newVideo._id);
+      topic.numberOfVideos+=1;
+
+     
+
+      // Apply the updates
+      topic.totalHours.hours += newVideo.totalHours.hours;
+      topic.totalHours.minutes += newVideo.totalHours.minutes;
+      topic.totalHours.seconds += newVideo.totalHours.seconds;
+      
+      
+      
+      // Normalize values
+      topic.totalHours.minutes += Math.floor(topic.totalHours.seconds / 60);
+      topic.totalHours.seconds %= 60;
+      
+      topic.totalHours.hours += Math.floor(topic.totalHours.minutes / 60);
+      topic.totalHours.minutes %= 60;
+  
+      
+      topic.markModified("totalHours");
+      
+      // Save
       await topic.save();
+    
+      
+
 
       addedVideos.push({title:newVideo.title , videoId: newVideo._id});
     } catch (error) {

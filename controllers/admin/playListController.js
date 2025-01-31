@@ -72,6 +72,25 @@ exports.addplaylists = async (req, res, next) => {
 
         await savedList.save();
         topic.playlist.push(savedList);
+
+        topic.totalHours.hours+=savedList.totalHours.hours;
+        topic.totalHours.minutes+=savedList.totalHours.minutes;
+        topic.totalHours.seconds+=savedList.totalHours.seconds
+    
+
+        topic.totalHours.minutes += Math.floor(topic.totalHours.seconds / 60);
+        topic.totalHours.seconds %= 60;
+        
+        topic.totalHours.hours += Math.floor(topic.totalHours.minutes / 60);
+        topic.totalHours.minutes %= 60;
+    
+        
+        topic.markModified("totalHours");
+        
+    
+
+  topic.numberOfVideos+=savedList.numberOfVideos;
+
         addedPlaylists.push({ url, title });
       } catch (error) {
         notAddedPlaylists.push({ url, reason: "Failed to fetch playlist details" });
