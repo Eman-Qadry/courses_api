@@ -22,7 +22,7 @@ exports.getTopicById = async (req, res) => {
         })
         .populate({
           path: "playlist",
-          match: { isActive: true, isValid: true },
+          match: {  isValid: true },
           select: "_id title thumbnailUrl numberOfVideos totalHours", // Fetch required fields (videos to calculate count)
         });
   
@@ -46,8 +46,8 @@ exports.getTopicById = async (req, res) => {
     try {
       const playlist = await Playlist.findById(req.params.listID)
         .populate({
-          path: "videos",
-          match: { isActive: true }, // Fetch only active videos
+          path: "video",
+          match: { isActive: true, isValid: true}, // Fetch only active and valid videos
         });
   
       if (!playlist) {
