@@ -118,7 +118,7 @@ Generates a password reset token and sends it via email.
 ---
 
 #### **4. Reset Password**
-`POST /api/admin/reset-password`
+`POST /api/v1/admin/auth/reset-password`
 
 Resets the admin password using a valid token.
 
