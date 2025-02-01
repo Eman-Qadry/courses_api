@@ -16,7 +16,7 @@ const {
   validateCheckAvailability
 } = require("../../validation/playlistValidator");
 
-listrouter.post("/", authorized, validateAddPlaylist,handleValidationErrors, listcontroller.addplaylists);
+listrouter.post("/", authorized, validateAddPlaylist,handleValidationErrors, listcontroller.addPlaylists);
 listrouter.post("/isAvailable", authorized, validateCheckAvailability,handleValidationErrors, listcontroller.checkPlaylistAvailability);
 
 module.exports = listrouter;
