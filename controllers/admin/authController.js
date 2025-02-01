@@ -4,11 +4,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const sendgridtransport=require('nodemailer-sendgrid-transport');
-const transporter=nodemailer.createTransport(sendgridtransport({
-  auth:{
-    api_key:process.env.SENDGRID_API_KEY
-  }
-}));
+let transporter;
 
 // admin loggin
 exports.postlogin=async (req,res,next)=>{
@@ -80,6 +76,12 @@ return res.status(500).json({
  
     //forgot password using email verification
   exports.forgotPassword = async (req, res, next) => {
+  
+transporter=nodemailer.createTransport(sendgridtransport({
+  auth:{
+    api_key: process.env.SENDGRID_API_KEY
+  }
+}));
           try {
             const { email } = req.body;
         
@@ -105,8 +107,8 @@ return res.status(500).json({
           
             const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
             const mailOptions = {
-              from: process.env.EMAIL_USER,
               to: email,
+              from: process.env.EMAIL_USER,
               subject: 'Reset Your Password',
               html: `
                 <p>Hi,</p>
@@ -117,16 +119,16 @@ return res.status(500).json({
               `,
             };
         
-            await transporter.sendMail(mailOptions);
-            
-
-        
-            return res.status(200).json({
-              message: "Password reset token sent to your email.",
-              data: {},
+            transporter.sendMail(mailOptions, (error, info) => {
+              if (error) {
+               
+                return res.status(500).json({ message: "Failed to send email", error: error.message });
+              }
+             
+              return res.status(200).json({ message: "Email sent successfully!" });
             });
           } catch (error) {
-            console.error("Error in forgotPassword:", error);
+        
             return res.status(500).json({
               message: "An error occurred while sending the reset token. Please try again.",
               data: { error: error.message },

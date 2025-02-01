@@ -100,7 +100,7 @@ in valid email
 ---
 
 #### **3. Forgot Password**
-`POST /api/admin/forgot-password`
+`POST /api/v1/admin/auth/forgot-password`
 
 Generates a password reset token and sends it via email.
 
@@ -212,5 +212,5 @@ This module relies on:
 
 ---
 
-This documentation provides a clear guide for developers working with the admin authentication module. 
+
 
