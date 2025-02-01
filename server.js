@@ -11,11 +11,6 @@ const sendMessag=require('./routes/User/sendMessage');
 const messageRoute=require('./routes/admin/messageRoute');
 const cors = require('cors');
 
-
-
-
-
-
 dotenv.config();
 const app=express();
 app.use(bodyparser.urlencoded({extended:true}));
