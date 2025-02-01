@@ -6,7 +6,9 @@ const authRouter=require('./routes/admin/authRuter');
 const vidrouter=require('./routes/admin/vidRouter');
 const playListRoute=require('./routes/admin/playListRoute');
 const topicRouter=require('./routes/admin/topicRouter');
-const userRoute=require('./routes/User/topicRoute')
+const userRoute=require('./routes/User/topicRout');
+const sendMessag=require('./routes/User/sendMessage');
+const messageRoute=require('./routes/admin/messageRoute');
 const cors = require('cors');
 
 
@@ -39,8 +41,11 @@ app.use('/api/v1/admin/auth',authRouter);
 app.use('/api/v1/admin/topics',topicRouter);
 app.use('/api/v1/admin/videos',vidrouter);
 app.use('/api/v1/admin/playLists',playListRoute);
-
+app.use('/api/v1/admin/messages',messageRoute);
+app.use('/api/v1/user',sendMessag)
 app.use('/api/v1/user/topics',userRoute)
+
+
 app.get('/api/v1/',(req,res,next)=>{
     res.status(200).json("welcome to the server")
 })

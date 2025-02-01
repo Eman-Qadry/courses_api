@@ -114,5 +114,22 @@ api/v1/user/topics/679ce91d162296c0dc064c82/playlists/679ce951162296c0dc064c89
 }
 ```
 
+
+#### ** send messages to admins **  
+**Endpoint:** `POST /api/v1/user/sendMessage`  
+
+**Description:** send messages to the admins  
+**Response:**  
+- **200 OK:** message sent successfully.  
+- **404 Not Found:** missing any data .  
+- **500 Internal Server Error:** If an error occurs while sending any message  
+
+**Example Response:**  
+```json
+{
+     "fullName":"emanQadry",
+     "email":"emanqadry24@gmail.com", "message":"your website is very good" 
+}
+```
 ---
 

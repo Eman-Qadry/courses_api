@@ -37,9 +37,19 @@ Adds a new playlist and associates its videos with a topic.
 **Request Body:**
 ```json
 {
-  "urls": "https://playlist.url",
-  "topicName": "JavaScript Basics"
+  "playlists": [
+   
+    {
+      "url": "https://www.youtube.com/watch?v=UqeITacFFGY&list=PLj1uh4JbO1owIfSFbVUDqrkANmW-CEg0l",
+      "topicName": "newTopic"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=97uUki1NkO8&list=PLj1uh4JbO1ow2tr_QhyL70MAWzYtSg_MZ",
+      "topicName": "newTopic"
+    }
+  ]
 }
+
 ```
 
 **Responses:**
