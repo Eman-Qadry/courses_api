@@ -4,20 +4,22 @@ const Topic = require("../../models/topic");
 const { fetchVideoDetails } = require("../../services/youtubeService");
 
 exports.addVideos = async function (req, res, next) {
-  const { videos,topicName  } = req.body;
+  const { videos } = req.body;
 
-
-  if (!Array.isArray(videos) || videos.length === 0 || !topicName) {
-    return res.status(400).json({ error: "URLs array and topicName are required." });
+  if (!Array.isArray(videos) || videos.length === 0) {
+    return res.status(400).json({ error: "An array of videos with { url, topicName } is required." });
   }
 
   const addedVideos = [];
   const errors = [];
 
-  for (const url of videos) {
-
-
+  for (const { url, topicName } of videos) {
     try {
+      if (!url || !topicName) {
+        errors.push({ url, error: "Both URL and topicName are required." });
+        continue;
+      }
+
       // Check if video already exists
       const existedVideo = await Video.findOne({ url });
       if (existedVideo) {
@@ -34,7 +36,7 @@ exports.addVideos = async function (req, res, next) {
 
       // Fetch video details
       const videoDetails = await fetchVideoDetails(url);
-      if (JSON.stringify(videoDetails) === "{}") {
+      if (!videoDetails || JSON.stringify(videoDetails) === "{}") {
         errors.push({ url, error: "Invalid or non-existent URL." });
         continue;
       }
@@ -52,34 +54,25 @@ exports.addVideos = async function (req, res, next) {
 
       const newVideo = await video.save();
       topic.video.push(newVideo._id);
-      topic.numberOfVideos+=1;
-
-     
+      topic.numberOfVideos += 1;
 
       // Apply the updates
       topic.totalHours.hours += newVideo.totalHours.hours;
       topic.totalHours.minutes += newVideo.totalHours.minutes;
       topic.totalHours.seconds += newVideo.totalHours.seconds;
-      
-      
-      
+
       // Normalize values
       topic.totalHours.minutes += Math.floor(topic.totalHours.seconds / 60);
       topic.totalHours.seconds %= 60;
-      
       topic.totalHours.hours += Math.floor(topic.totalHours.minutes / 60);
       topic.totalHours.minutes %= 60;
-  
-      
+
       topic.markModified("totalHours");
-      
+
       // Save
       await topic.save();
-    
-      
 
-
-      addedVideos.push({title:newVideo.title , videoId: newVideo._id});
+      addedVideos.push({ title: newVideo.title, videoId: newVideo._id });
     } catch (error) {
       errors.push({ url, error: error.message });
     }
@@ -87,6 +80,7 @@ exports.addVideos = async function (req, res, next) {
 
   res.status(200).json({ message: "Processing complete.", addedVideos, errors });
 };
+
 
 exports.activateVideos = async function (req, res, next) {
   const { videoIds } = req.body;

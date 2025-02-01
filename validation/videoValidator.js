@@ -6,13 +6,17 @@ module.exports = {
     .isArray({ min: 1 })
     .withMessage("Videos must be an array and contain at least one URL."),
   
-  body("videos.*")
+  body("videos.*.url")
     .isString()
-    .withMessage("Each video URL must be a string.")
     .matches(/^https:\/\/youtu\.be\/[a-zA-Z0-9_-]+(\?.*)?$/)
     .withMessage("Each video must be a valid YouTube short URL (https://youtu.be/...)."),
 
-    body("topicName").isString().notEmpty().withMessage("Each video must have a topic name."),
+  body("videos.*.topicName")
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage("Each video must have a topic name."),
+
   ],
 
   activateVideosValidation: [

@@ -40,30 +40,34 @@ Adds a list of videos to the system.
 **Request Body:**
 ```json
 {
-  "videos": ["https://youtu.be/C9mkzzAevzc?si=Vf19BSfx0l1Ju3Kg","https://youtu.be/encVmPEDy2k?si=j36RdU-ClU3LvaAt"],
-      "topicName": "animat"
-    
-  
+  "videos": [
+    {
+      "url": "https://youtu.be/NpqynQrkReU?si=7ScLYilCISOt1i5X",
+      "topicName": "animate"
+    },
+    {
+      "url": "https://youtu.be/2xXbwyVhMvM?si=p4eo3w51ZAdqQnBu",
+      "topicName": "newTopic"
+    }
+  ]
 }
+
 ```
 **Responses:**
 - `200 OK` - Videos added successfully.
-{
+
+    {
     "message": "Processing complete.",
     "addedVideos": [
         {
-            "title": "ما تغلطش غلطتي! 10 نصائح للمبتدئين في البرمجة",
-            "videoId": "679abc2f26759de7ef024acd"
+            "title": "“مين من ال sharks  جاهز انه يبقى جزء من مستقبل ال E Commerce”. [شارك تانك مصر]",
+            "videoId": "679e250cdb43ee0f3e9cb6a8"
         }
     ],
     "errors": [
         {
-            "url": "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x",
-            "error": "Video already exists."
-        },
-        {
-            "url": "https://youtu.be/C9mkzzAevzc?si=Vf19BSfx0l1Ju3Kg",
-            "error": "Video already exists."
+            "url": "https://youtu.be/NpqynQrkReU?si=7ScLYilCISOt1i5X",
+            "error": "Topic animate not found."
         }
     ]
 }
@@ -421,6 +425,34 @@ Fetches videos based on filters
 - `500 Internal Server Error` - Error during video processing.
 
 ---
+
+check availability of list of videos
+`POST /api/v1/admin/videos/isAvailable`
+**Request Body:**
+```json
+{
+  "videos": ["https://youtu.be/C9mkzzAevzc?si=Vf19BSfx0l1Ju3Kg","https://youtu.be/encVmPEDy2k?si=j36RdU-ClU3LvaAt"]
+}
+```
+**Responses:**
+- `200 OK` - Videos added successfully.
+{
+    "message": "Video availability check completed.",
+    "availableVideos": [
+        {
+            "url": "https://youtu.be/DdxrQV_bkkY?si=HDD5rU-ijQPW_n4x",
+            "title": "فاهم 55 | سلسلة لازم تتحرر - (2) التحرر من التفاهة | مع الشيخ/ أمجد سمير"
+        }
+    ],
+    "notAvailableVideos": []
+}
+   
+- `400 Bad Request` - Missing or invalid input data.
+
+- `500 Internal Server Error` - Error during video processing.
+
+---
+
 ## Dependencies
 This module relies on:
 - **Mongoose** - For MongoDB interaction.
