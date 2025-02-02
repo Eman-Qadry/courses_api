@@ -3,7 +3,7 @@ const Admin = require('../../models/admin');
 const Playlist = require('../../models/playlist');
 const Video = require('../../models/video');
 
-const { fetchVideoDetails, fetchPlaylistDetails } = require("../../services/youtubeService");
+const { fetchVideoDetails, fetchPlaylistDetails ,checklistAvailability} = require("../../services/youtubeService");
 
 exports.addPlaylists = async (req, res, next) => {
   try {
@@ -127,7 +127,7 @@ exports.checkPlaylistAvailability = async (req, res) => {
     
     for (const url of urls) {
       try {
-        const playlistDetails = await fetchPlaylistDetails(url);
+        const playlistDetails = await checklistAvailability(url);
         if (playlistDetails) {
           availablePlaylists.push({ url, title: playlistDetails.title});
         } else {

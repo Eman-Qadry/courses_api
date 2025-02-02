@@ -147,4 +147,46 @@ totalDuration.minutes = totalDuration.minutes % 60; // Keep remaining minutes wi
 
 
 
-module.exports = { fetchVideoDetails, fetchPlaylistDetails };
+const checklistAvailability = async function (url) {
+  const playlistId = extractPlaylistId(url);
+  if (!playlistId) throw new Error("Invalid playlist URL");
+
+  const playlistOptions = {
+    method: 'GET',
+    url: 'https://youtube-data-api-v33.p.rapidapi.com/playlists',
+    params: {
+      id: playlistId,
+      key: process.env.x_rapidapi_key,
+      part: 'snippet,contentDetails',
+    },
+    headers: {
+      'x-rapidapi-host': process.env.x_rapidapi_host,
+      'x-rapidapi-key': process.env.x_rapidapi_key,
+    },
+  };
+
+  try {
+    // Fetch playlist metadata
+    const playlistResponse = await axios.request(playlistOptions);
+    const playlistDetails = playlistResponse.data.items[0];
+    if (!playlistDetails) throw new Error("Playlist not found");
+
+    const title = playlistDetails.snippet.title;
+    const description = playlistDetails.snippet.description;
+    const thumbnailUrl = playlistDetails.snippet.thumbnails.high.url;
+
+  
+
+    return {
+      title,
+      description,
+      thumbnailUrl
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+
+module.exports = { fetchVideoDetails, fetchPlaylistDetails ,checklistAvailability};
