@@ -3,17 +3,20 @@ const Video = require("../models/video");
 
 const validateVideos = async () => {
   try {
+    console.log("start validation");
     const videos = await Video.find(); // Fetch all videos
 
     for (const video of videos) {
       const videoDetails = await fetchVideoDetails(video.url);
       
       if (!videoDetails || !videoDetails.thumbnailUrl) {
+   
         // Mark video as invalid
         video.isValid = false;
         video.thumbnailUrl = null;
       } else {
         // Update with valid data
+      
         video.isValid = true;
         video.thumbnailUrl = videoDetails.thumbnailUrl;
       }

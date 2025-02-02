@@ -10,7 +10,7 @@ const fetchVideoDetails = async function (url) {
 
   const options = {
     method: 'GET',
-    url: 'https://youtube-data-api-v33.p.rapidapi.com/videos',
+    url: process.env.rapidapi_VIDEOURL,
     params: {
       id: videoId,
       key: process.env.x_rapidapi_key,
@@ -49,7 +49,7 @@ const fetchPlaylistDetails = async function (url) {
 
   const playlistOptions = {
     method: 'GET',
-    url: 'https://youtube-data-api-v33.p.rapidapi.com/playlists',
+    url: process.env.rapidapi_LISTURL,
     params: {
       id: playlistId,
       key: process.env.x_rapidapi_key,
@@ -153,7 +153,7 @@ const checklistAvailability = async function (url) {
 
   const playlistOptions = {
     method: 'GET',
-    url: 'https://youtube-data-api-v33.p.rapidapi.com/playlists',
+    url: process.env.rapidapi_LISTURL,
     params: {
       id: playlistId,
       key: process.env.x_rapidapi_key,
