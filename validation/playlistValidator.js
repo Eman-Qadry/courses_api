@@ -21,14 +21,14 @@ exports.validateAddPlaylist = [
 ];
 
 exports.validateCheckAvailability = [
-  body("urls")
-    .isArray({ min: 1 })
-    .withMessage("URLs must be a non-empty array."),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-  }
+  body('urls')
+  .isArray().withMessage('URLs must be an array')
+  .notEmpty().withMessage('URLs array cannot be empty')
+  .custom((urls) => {
+      if (! urls.every(url =>  url.startsWith('https://www.youtube.com/')|| url.startsWith('https://youtube.com' )) ){
+          throw new Error('Each URL must be a valid YouTube link');
+      }
+      return true;
+  }),
+  
 ];

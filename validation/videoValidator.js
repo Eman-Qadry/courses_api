@@ -8,7 +8,7 @@ module.exports = {
   
   body("videos.*.url")
     .isString()
-    .matches(/^https:\/\/youtu\.be\/[a-zA-Z0-9_-]+(\?.*)?$/)
+    .isURL()
     .withMessage("Each video must be a valid YouTube short URL (https://youtu.be/...)."),
 
   body("videos.*.topicName")
