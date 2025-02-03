@@ -65,7 +65,9 @@ const fetchPlaylistDetails = async function (url) {
     // Fetch playlist metadata
     const playlistResponse = await axios.request(playlistOptions);
     const playlistDetails = playlistResponse.data.items[0];
-    if (!playlistDetails) throw new Error("Playlist not found");
+    if (!playlistDetails){
+      return {};
+    }
 
     const title = playlistDetails.snippet.title;
     const description = playlistDetails.snippet.description;
@@ -140,8 +142,7 @@ totalDuration.minutes = totalDuration.minutes % 60; // Keep remaining minutes wi
       totalDuration,
     };
   } catch (error) {
-    console.error(error);
-    throw error;
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
 
@@ -169,7 +170,9 @@ const checklistAvailability = async function (url) {
     // Fetch playlist metadata
     const playlistResponse = await axios.request(playlistOptions);
     const playlistDetails = playlistResponse.data.items[0];
-    if (!playlistDetails) throw new Error("Playlist not found");
+    if (!playlistDetails) {
+      return {};
+    }
 
     const title = playlistDetails.snippet.title;
     const description = playlistDetails.snippet.description;
@@ -183,8 +186,7 @@ const checklistAvailability = async function (url) {
       thumbnailUrl
     };
   } catch (error) {
-    console.error(error);
-    throw error;
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
 
