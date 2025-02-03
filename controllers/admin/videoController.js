@@ -95,11 +95,12 @@ exports.activateVideos = async function (req, res, next) {
   for (const videoId of videoIds) {
     try {
       const video = await Video.findByIdAndUpdate(videoId, { isActive: true }, { new: true });
+      await updateTopicTime(video.topicId, video.totalHours, 'add');
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;
       }
-      updatedVideos.push(video);
+      updatedVideos.push(videoId);
     } catch (error) {
       errors.push({ videoId, error: error.message });
     }
@@ -121,11 +122,12 @@ exports.deactivateVideos = async function (req, res, next) {
   for (const videoId of videoIds) {
     try {
       const video = await Video.findByIdAndUpdate(videoId, { isActive: false }, { new: true });
+      await updateTopicTime(video.topicId, video.totalHours, 'subtract');
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;
       }
-      updatedVideos.push(video);
+      updatedVideos.push(videoId);
     } catch (error) {
       errors.push({ videoId, error: error.message });
     }
@@ -147,6 +149,7 @@ exports.deleteVideos = async function (req, res, next) {
   for (const videoId of videoIds) {
     try {
       const video = await Video.findByIdAndDelete(videoId);
+      await updateTopicTime(video.topicId, video.totalHours, 'subtract');
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;
@@ -221,8 +224,7 @@ exports.getVideos = async function (req, res, next) {
       isRecommended, 
       hasThumbnail, 
       deactivated, 
-      page = 1, 
-      limit = 25 
+     
     } = req.query;
 
     // Build a query object dynamically
@@ -314,5 +316,41 @@ exports.videoAvailability = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+};
+
+
+const updateTopicTime = async (topicId, videoTime, operation) => {
+  try {
+      const topic = await Topic.findById(topicId);
+      if (!topic) return;
+
+      let totalSeconds = 
+          topic.totalHours.hours * 3600 + 
+          topic.totalHours.minutes * 60 + 
+          topic.totalHours.seconds;
+
+      let videoSeconds = 
+          videoTime.hours * 3600 + 
+          videoTime.minutes * 60 + 
+          videoTime.seconds;
+
+      if (operation === 'add') {
+          totalSeconds += videoSeconds;
+          topic.numberOfVideos+=1;
+      } else if (operation === 'subtract') {
+          totalSeconds -= videoSeconds;
+          totalSeconds = Math.max(0, totalSeconds); // Prevent negative time
+          topic.numberOfVideos--;
+      }
+
+      topic.totalHours.hours = Math.floor(totalSeconds / 3600);
+      totalSeconds %= 3600;
+      topic.totalHours.minutes = Math.floor(totalSeconds / 60);
+      topic.totalHours.seconds = totalSeconds % 60;
+ 
+      await topic.save();
+  } catch (err) {
+      console.error('Error updating topic time:', err);
   }
 };
