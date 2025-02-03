@@ -1,5 +1,6 @@
 const Topic = require("../../models/topic");
 const Playlist=require("../../models/playlist");
+const Video=require("../../models/video")
 exports.getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.find().select(" _id name numberOfVideos totalHours");
@@ -18,6 +19,7 @@ exports.getTopicById = async (req, res) => {
         .populate({
           path: "video",
           match: { isActive: true, isValid: true },
+          
         
         })
         .populate({
@@ -62,3 +64,18 @@ exports.getTopicById = async (req, res) => {
   
 
 
+
+  exports.getvideoById = async (req, res) => {
+    try {
+      const video = await Video.findById(req.params.videoID);
+      if (!video) {
+        return res.status(404).json({ error: "video not found." });
+      }
+  
+      res.status(200).json({ video });
+
+    }
+    catch (error) {
+      res.status(500).json({ error: "Error fetching video.", details: error.message });
+    }
+  };

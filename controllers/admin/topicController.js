@@ -45,7 +45,7 @@ exports.createTopic = async (req, res) => {
 
 exports.getTopics = async (req, res) => {
   try {
-    const topics = await Topic.find().select(" _id name numberOfVideos totalHours");;
+    const topics = await Topic.find().select(" _id name actualHours actualNumberOfVideos");;
     if (!topics || topics.length === 0) {
       return res.status(400).json({
         message: 'There are no topics yet, try creating one.',

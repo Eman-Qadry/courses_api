@@ -33,9 +33,9 @@ Registers a new topic in the system.
 
 **Request Body:**  
 ```json  
-{  
-  "name": "Topic Name"  
-}  
+{
+    "name":"english"
+}
 ```  
 
 **Responses:**  
@@ -46,10 +46,22 @@ Registers a new topic in the system.
         "topic": {
             "name": "english",
             "numberOfVideos": 0,
-            "totalHours": 0,
+            "actualNumberOfVideos": 0,
             "video": [],
             "playlist": [],
-            "_id": "6799495109bc945ddf4d7d56",
+            "_id": "67a10ce0755a4c02390c8cca",
+            "actualHours": {
+                "hours": 0,
+                "minutes": 0,
+                "seconds": 0,
+                "_id": "67a10ce0755a4c02390c8ccb"
+            },
+            "totalHours": {
+                "hours": 0,
+                "minutes": 0,
+                "seconds": 0,
+                "_id": "67a10ce0755a4c02390c8ccc"
+            },
             "__v": 0
         }
     }
@@ -75,24 +87,30 @@ None
     "message": "These are the topics.",
     "topics": [
         {
+            "actualNumberOfVideos": 0,
             "_id": "678ca02e5534b03c819d2656",
-            "name": "sounds",
-            "numberOfVideos": 0,
-            "totalHours": 0,
-            "video": [
-                "678fd42952ebea1027c07e54",
-                "678fdd920a206bf06ee776ac",
-                "6791372e5c46fdb9518e43f3",
-                "67914fcc232ddc5bc0afb7db"
-            ],
-            "playlist": [
-                "67914c09cd4f9c6cf0feaa76",
-                "67914d42e5d468f584175aa7"
-            ],
-            "__v": 3
+            "name": "animat",
+            "actualHours": {
+                "hours": 0,
+                "minutes": 0,
+                "seconds": 0,
+                "_id": "67a1153d6fbaabf26313c236"
+            }
+        },
+     
+        {
+            "_id": "67a1105bb7851a912bba34df",
+            "name": "wafaa",
+            "actualNumberOfVideos": 3,
+            "actualHours": {
+                "hours": 1,
+                "minutes": 56,
+                "seconds": 9,
+                "_id": "67a1105bb7851a912bba34e0"
+            }
         }
     ]
-} 
+}
 - `400 Bad Request` - No topics found.  
 - `500 Internal Server Error` - Error occurred while fetching topics.  
 
@@ -169,10 +187,5 @@ This module relies on:
 - **Authentication Middleware:** Ensures only authorized users can manage topics.  
 - **Error Handling:** Provides clear error responses for client-side debugging.  
 
-## Future Enhancements  
-- Add pagination and sorting when retrieving topics.  
-- Implement bulk operations for managing multiple topics simultaneously.  
-- Include metrics like topic popularity or usage statistics.  
 
----
 

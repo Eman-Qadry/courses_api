@@ -16,6 +16,8 @@ name:{
     required:true
 },
 numberOfVideos: { type: Number, default: 0 },
+actualNumberOfVideos: { type: Number, default: 0 },
+actualHours:{ type: TotalHoursSchema, default: () => ({}) },
 totalHours: { type: TotalHoursSchema, default: () => ({}) }
 ,  
 video:[{

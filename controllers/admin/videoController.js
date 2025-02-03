@@ -55,7 +55,7 @@ exports.addVideos = async function (req, res, next) {
       const newVideo = await video.save();
       topic.video.push(newVideo._id);
       topic.numberOfVideos += 1;
-
+       topic.actualNumberOfVideos+=1
       // Apply the updates
       topic.totalHours.hours += newVideo.totalHours.hours;
       topic.totalHours.minutes += newVideo.totalHours.minutes;
@@ -68,6 +68,10 @@ exports.addVideos = async function (req, res, next) {
       topic.totalHours.minutes %= 60;
 
       topic.markModified("totalHours");
+
+      topic.actualHours.hours=topic.totalHours.hours;
+      topic.actualHours.minutes=topic.totalHours.minutes;
+      topic.actualHours.seconds= topic.totalHours.seconds;
 
       // Save
       await topic.save();
@@ -94,12 +98,21 @@ exports.activateVideos = async function (req, res, next) {
 
   for (const videoId of videoIds) {
     try {
-      const video = await Video.findByIdAndUpdate(videoId, { isActive: true }, { new: true });
-      await updateTopicTime(video.topicId, video.totalHours, 'add');
+      const video = await Video.findOne({_id:videoId})
+     
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;
       }
+      if (video.isActive === true)
+
+      {
+        errors.push({ videoId, error: "Video is already active" });
+        continue;
+      }
+      await updateTopicTime(video.topicId, video.totalHours, 'add');
+      video.isActive=true;
+      await video.save();
       updatedVideos.push(videoId);
     } catch (error) {
       errors.push({ videoId, error: error.message });
@@ -121,12 +134,21 @@ exports.deactivateVideos = async function (req, res, next) {
 
   for (const videoId of videoIds) {
     try {
-      const video = await Video.findByIdAndUpdate(videoId, { isActive: false }, { new: true });
-      await updateTopicTime(video.topicId, video.totalHours, 'subtract');
+      const video = await Video.findOne( { _id: videoId });
+      
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;
       }
+      if (video.isActive === false)
+
+        {
+          errors.push({ videoId, error: "Video is already deactived" });
+          continue;
+        }
+        await updateTopicTime(video.topicId, video.totalHours, 'subtract');
+        video.isActive=false;
+        await video.save();
       updatedVideos.push(videoId);
     } catch (error) {
       errors.push({ videoId, error: error.message });
@@ -150,6 +172,12 @@ exports.deleteVideos = async function (req, res, next) {
     try {
       const video = await Video.findByIdAndDelete(videoId);
       await updateTopicTime(video.topicId, video.totalHours, 'subtract');
+      const topic = await Topic.findById(video.topicId);
+      topic.actualHours.hours=topic.totalHours.hours;
+      topic.actualHours.minutes=topic.totalHours.minutes;
+      topic.actualHours.seconds= topic.totalHours.seconds;
+      topic.actualNumberOfVideos-=1;
+      await topic.save();
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
         continue;

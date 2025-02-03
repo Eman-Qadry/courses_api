@@ -174,6 +174,20 @@ Activates one or more videos.
         }
     ]
 }
+
+
+or
+
+{
+    "message": "Processing complete.",
+    "updatedVideos": [],
+    "errors": [
+        {
+            "videoId": "67a11081b7851a912bba34e5",
+            "error": "Video is already active"
+        }
+    ]
+}
 - `500 Internal Server Error` - Error during video activation.
 
 ---

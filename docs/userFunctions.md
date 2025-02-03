@@ -31,7 +31,7 @@
 ---
 
 #### **1.2 Get Topic by ID**  
-**Endpoint:** `GET /api/v1/user/topics/679e273998f68691974c5b67`  
+**Endpoint:** `GET /api/v1/user/topics/601c8b3e8b5e4b001f9a1a2b`  
 **Description:** Retrieves details of a specific topic, including its videos and playlists.  
 **Response:**  
 - **200 OK:** Returns the topic with related videos and playlists.  
@@ -90,7 +90,7 @@
 
 #### **1.3 Get Playlist by ID**  
 **Endpoint:** `GET /topics/:id/playlists/:listID`  
-api/v1/user/topics/679ce91d162296c0dc064c82/playlists/679ce951162296c0dc064c89
+
 **Description:** Retrieves details of a specific playlist, including its videos.  
 **Response:**  
 - **200 OK:** Returns the playlist details.  
@@ -114,6 +114,39 @@ api/v1/user/topics/679ce91d162296c0dc064c82/playlists/679ce951162296c0dc064c89
 }
 ```
 
+#### **1.3 Get Playlist by ID**  
+**Endpoint:** `GET /topics//:id/video/:videoID`  
+
+**Description:** Retrieves details of a specific video.  
+**Response:**  
+- **200 OK:** Returns the video details.  
+- **404 Not Found:** If the video is not found.  
+- **500 Internal Server Error:** If an error occurs while fetching the video.  
+
+**Example Response:**  
+```json
+{
+    "video": {
+        "_id": "67a11081b7851a912bba34e5",
+        "title": "جراح القلب | الدحيح",
+        "url": "https://youtu.be/9ZTCUyhoknU?si=kaLag6561swhQGHW",
+        "thumbnailUrl": "https://i.ytimg.com/vi/9ZTCUyhoknU/hqdefault.jpg",
+        "isActive": true,
+        "favourite": false,
+        "totalHours": {
+            "hours": 0,
+            "minutes": 58,
+            "seconds": 39
+        },
+  
+        "isRecommended": false,
+        "topicId": "67a1105bb7851a912bba34df",
+        "isValid": true,
+        "lastChecked": "2025-02-03T18:52:49.269Z",
+        "__v": 0
+    }
+}
+```
 
 #### ** send messages to admins **  
 **Endpoint:** `POST /api/v1/user/sendMessage`  
@@ -128,7 +161,7 @@ api/v1/user/topics/679ce91d162296c0dc064c82/playlists/679ce951162296c0dc064c89
 ```json
 {
      "fullName":"emanQadry",
-     "email":"emanqadry24@gmail.com", "message":"your website is very good" 
+     "email":"emanqadry24@gmail.com", "message":"your website is very good,i would like to contact with you " 
 }
 ```
 ---

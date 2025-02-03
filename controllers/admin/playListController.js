@@ -98,7 +98,11 @@ exports.addPlaylists = async (req, res, next) => {
         topic.totalHours.minutes %= 60;
 
         topic.numberOfVideos += savedList.numberOfVideos;
+        topic.actualNumberOfVideos+=savedList.numberOfVideos;
         topic.markModified("totalHours");
+        topic.actualHours.hours=topic.totalHours.hours;
+      topic.actualHours.minutes=topic.totalHours.minutes;
+      topic.actualHours.seconds= topic.totalHours.seconds;
         await topic.save();
 
         addedPlaylists.push({ url, topicName, title });
