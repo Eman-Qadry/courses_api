@@ -1,5 +1,6 @@
 const Topic = require('../../models/topic');
-
+const Video = require('../../models/video');  
+const Playlist = require('../../models/playlist'); 
 exports.createTopic = async (req, res) => {
   const name = req.body.name;
   
@@ -119,7 +120,7 @@ exports.renameTopic = async (req, res) => {
 exports.deleteTopic = async (req, res) => {
   const { topicId } = req.query;
 
-  // Validate input
+  
   if (!topicId || typeof topicId !== 'string') {
     return res.status(400).json({
       message: "Topic ID must be a valid string.",
@@ -136,6 +137,13 @@ exports.deleteTopic = async (req, res) => {
       });
     }
 
+   
+    await Video.deleteMany({  topicId: topicId });
+
+    
+    await Playlist.deleteMany({  topicId: topicId });
+
+    // حذف الموضوع نفسه
     const deleted = await Topic.deleteOne({ _id: topicId });
     
     if (!deleted) {
@@ -146,11 +154,11 @@ exports.deleteTopic = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: 'Topic deleted successfully.',
+      message: 'Topic and all related videos & playlists deleted successfully.',
       data: {}
     });
   } catch (error) {
-   
+    console.error(error);
     return res.status(500).json({
       message: 'Error occurred while deleting the topic.',
       data: { error: error.message }

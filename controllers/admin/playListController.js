@@ -131,6 +131,12 @@ exports.checkPlaylistAvailability = async (req, res) => {
     
     for (const url of urls) {
       try {
+         // Check if the playlist already exists
+         const existingList = await Playlist.findOne({ url });
+         if (existingList) {
+          notFoundPlaylists.push({ url, reason: "Playlist already exists" });
+           continue;
+         }
         const playlistDetails = await checklistAvailability(url);
         if (playlistDetails) {
           availablePlaylists.push({ url, title: playlistDetails.title});

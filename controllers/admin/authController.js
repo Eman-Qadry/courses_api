@@ -105,7 +105,7 @@ transporter=nodemailer.createTransport(sendgridtransport({
             await admin.save();
         
           
-            const resetLink = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
+            const resetLink = `${process.env.FRONTEND_URL}/resetpass.html?token=${resetToken}`;
             const mailOptions = {
               to: email,
               from: process.env.EMAIL_USER,

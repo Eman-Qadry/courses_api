@@ -324,6 +324,13 @@ exports.videoAvailability = async (req, res) => {
 
     for (const url of videos) {
       try {
+          // Check if video already exists
+      const existedVideo = await Video.findOne({ url });
+      if (existedVideo) {
+       
+        notAvailableVideos.push({ url, reason: "Video already exists." });
+        continue;
+      }
         // Fetch video details
         const videoDetails = await fetchVideoDetails(url);
         
