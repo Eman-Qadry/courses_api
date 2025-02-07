@@ -1,5 +1,3 @@
-// hash password 
-//generate token
 
 
 exports.convertDurationToHour=function(duration) {

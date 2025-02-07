@@ -49,6 +49,10 @@ app.get('/api/v1/',(req,res,next)=>{
 app.listen('5000',()=>{
     connectDB();
     console.log("server is started");
-     checkPlaylists();
+     scheduleCheckPlaylists();
     
 })
+ function scheduleCheckPlaylists() {
+   checkPlaylists();
+  setInterval(scheduleCheckPlaylists, 172800000); // Schedule the next run after 2 days
+}

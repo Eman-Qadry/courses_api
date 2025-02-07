@@ -1,15 +1,6 @@
 const mongoose=require('mongoose');
 const video = require('./video');
-
-const TotalHoursSchema = new mongoose.Schema({
-    hours: { type: Number, default: 0 },
-    minutes: { type: Number, default: 0 },
-    seconds: { type: Number, default: 0 }
-  });
-  
-  
-
-
+const TotalHoursSchema = require('./totalHour'); 
 const topicSchema=new mongoose.Schema({
 name:{
     type:String,

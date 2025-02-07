@@ -57,8 +57,9 @@ const checkPlaylists = async function () {
 
                         const newVideo = await videoDoc.save();
                         playlist.video.push(newVideo._id);
-                        
-                        
+                        playlist.numberOfVideos+=1;
+                        await  playlist.save();
+
                         newTotalHours.hours += newVideo.totalHours.hours;
                         newTotalHours.minutes += newVideo.totalHours.minutes;
                         newTotalHours.seconds += newVideo.totalHours.seconds;
@@ -81,7 +82,7 @@ const checkPlaylists = async function () {
                 await playlist.save();
 
         
-                await  updateTime(topic._id,playlist.totalHours,"add") 
+                await  updateTime(topic._id, newTotalHours,"add") 
             }
         }
     } catch (error) {
@@ -144,7 +145,7 @@ async function getVideoDetails(videoId) {
         return null;
     }
 }
-async function updateTime(topicID,listTime,operation){
+async function updateTime(topicID,listTime,operation,flag){
   const topic = await Topic.findById(topicID);
   
   let totalSeconds = 
@@ -152,12 +153,23 @@ async function updateTime(topicID,listTime,operation){
   topic.totalHours.minutes * 60 + 
   topic.totalHours.seconds;
 
+  let totalactual=
+  topic.actualHours.hours * 3600 + 
+  topic.actualHours.minutes * 60 + 
+  topic.actualHours.seconds;
 let listSeconds = 
 listTime.hours * 3600 + 
 listTime.minutes * 60 + 
 listTime.seconds;
 if (operation==="add"){
   totalSeconds+=listSeconds
+  totalactual+=listSeconds
+
+
+  topic.actualHours.hours  = Math.floor(totalactual / 3600);
+      totalactual %= 3600;
+      topic.actualHours.minutes = Math.floor(totalactual / 60);
+      topic.actualHours.seconds = totalactual % 60;
 }
 else {
   totalSeconds-=listSeconds
@@ -166,6 +178,9 @@ topic.totalHours.hours  = Math.floor(totalSeconds / 3600);
       totalSeconds %= 3600;
       topic.totalHours.minutes = Math.floor(totalSeconds / 60);
       topic.totalHours.seconds = totalSeconds % 60;
+
+
+      
  
       await topic.save();
 }

@@ -1,6 +1,7 @@
 const express = require("express");
 const Video = require("../../models/video");
 const Topic = require("../../models/topic");
+const Playlist=require("../../models/playlist");
 const { fetchVideoDetails } = require("../../services/youtubeService");
 
 exports.addVideos = async function (req, res, next) {
@@ -110,6 +111,11 @@ exports.activateVideos = async function (req, res, next) {
         errors.push({ videoId, error: "Video is already active" });
         continue;
       }
+     
+      if (video.listId) {
+        updatePlaylistTime(video.listId, video.totalHours, "add")
+        
+      }
       await updateTopicTime(video.topicId, video.totalHours, 'add');
       video.isActive=true;
       await video.save();
@@ -135,6 +141,7 @@ exports.deactivateVideos = async function (req, res, next) {
   for (const videoId of videoIds) {
     try {
       const video = await Video.findOne( { _id: videoId });
+     
       
       if (!video) {
         errors.push({ videoId, error: "Video not found." });
@@ -145,6 +152,12 @@ exports.deactivateVideos = async function (req, res, next) {
         {
           errors.push({ videoId, error: "Video is already deactived" });
           continue;
+        }
+       
+          
+        if (video.listId) {
+          updatePlaylistTime(video.listId, video.totalHours, 'subtract')
+          
         }
         await updateTopicTime(video.topicId, video.totalHours, 'subtract');
         video.isActive=false;
@@ -170,18 +183,38 @@ exports.deleteVideos = async function (req, res, next) {
 
   for (const videoId of videoIds) {
     try {
-      const video = await Video.findByIdAndDelete(videoId);
+      const video = await Video.findOne( { _id: videoId });
+     
+      
+      if (!video) {
+        errors.push({ videoId, error: "Video not found." });
+        continue;
+      }
+      
+      const playlist = await Playlist.findById(video.listId);
+      if (playlist) {
+        playlist.totalHours.hours -=video.totalHours.hours;
+        playlist.totalHours.minutes -= video.totalHours.minutes;
+        playlist.totalHours.seconds -= video.totalHours.seconds;
+
+        // Normalize values
+        playlist.totalHours.minutes += Math.floor(playlist.totalHours.seconds / 60);
+        playlist.totalHours.seconds %= 60;
+        playlist.totalHours.hours += Math.floor(playlist.totalHours.minutes / 60);
+        playlist.totalHours.minutes %= 60;
+playlist.numberOfVideos-=1;
+        await playlist.save();
+        
+      }
       await updateTopicTime(video.topicId, video.totalHours, 'subtract');
       const topic = await Topic.findById(video.topicId);
       topic.actualHours.hours=topic.totalHours.hours;
       topic.actualHours.minutes=topic.totalHours.minutes;
       topic.actualHours.seconds= topic.totalHours.seconds;
       topic.actualNumberOfVideos-=1;
+      await Video.deleteOne(video);
       await topic.save();
-      if (!video) {
-        errors.push({ videoId, error: "Video not found." });
-        continue;
-      }
+     
       deletedVideos.push(videoId);
     } catch (error) {
       errors.push({ videoId, error: error.message });
@@ -389,3 +422,38 @@ const updateTopicTime = async (topicId, videoTime, operation) => {
       console.error('Error updating topic time:', err);
   }
 };
+
+async function updatePlaylistTime(playlistId, videoTime, operation){
+  try {
+    const list = await Playlist.findById(playlistId);
+    if (!list) return;
+
+    let totalSeconds = 
+    list.totalHours.hours * 3600 + 
+    list.totalHours.minutes * 60 + 
+    list.totalHours.seconds;
+
+    let videoSeconds = 
+        videoTime.hours * 3600 + 
+        videoTime.minutes * 60 + 
+        videoTime.seconds;
+
+    if (operation === 'add') {
+        totalSeconds += videoSeconds;
+        list.numberOfVideos+=1;
+    } else if (operation === 'subtract') {
+        totalSeconds -= videoSeconds;
+        totalSeconds = Math.max(0, totalSeconds); // Prevent negative time
+        list.numberOfVideos--;
+    }
+
+    list.totalHours.hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    list.totalHours.minutes = Math.floor(totalSeconds / 60);
+    list.totalHours.seconds = totalSeconds % 60;
+
+    await list.save();
+} catch (err) {
+    console.error('Error updating topic time:', err);
+}
+}
