@@ -5,6 +5,7 @@ const Video = require("../models/video"); // Mongoose model for videos
 const { rapidapiOptions } = require('../utils/rapidOptions');
 const { convertDurationToHour } = require('../utils/helpers');
 const Topic = require('../models/topic'); 
+const playlist = require('../models/playlist');
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
 const RAPID_API_HOST = process.env.RAPID_API_HOST; // Host for YouTube API via RapidAPI
 
@@ -22,7 +23,7 @@ const checkPlaylists = async function () {
 
             if (!playlistData) {
               
-             await  updateTime(topic._id,playlist.totalHours,"subtract") 
+             await  updateTime(topic._id,playlist.totalHours,"subtract",playlist.numberOfVideos) 
   // Playlist is deleted, deactivate it and its videos
   await Playlist.updateOne({ _id: playlist._id }, { isActive: false });
   await Video.updateMany({ listId: playlist._id }, { isActive: false });
@@ -82,7 +83,7 @@ const checkPlaylists = async function () {
                 await playlist.save();
 
         
-                await  updateTime(topic._id, newTotalHours,"add") 
+                await  updateTime(topic._id, newTotalHours,"add",0) 
             }
         }
     } catch (error) {
@@ -145,7 +146,7 @@ async function getVideoDetails(videoId) {
         return null;
     }
 }
-async function updateTime(topicID,listTime,operation,flag){
+async function updateTime(topicID,listTime,operation,vidNumber){
   const topic = await Topic.findById(topicID);
   
   let totalSeconds = 
@@ -165,7 +166,8 @@ if (operation==="add"){
   totalSeconds+=listSeconds
   totalactual+=listSeconds
 
-
+topic.numberOfVideos+=1;
+topic.actualNumberOfVideos+=1;
   topic.actualHours.hours  = Math.floor(totalactual / 3600);
       totalactual %= 3600;
       topic.actualHours.minutes = Math.floor(totalactual / 60);
@@ -173,6 +175,7 @@ if (operation==="add"){
 }
 else {
   totalSeconds-=listSeconds
+  topic.numberOfVideos-=vidNumber;
 }
 topic.totalHours.hours  = Math.floor(totalSeconds / 3600);
       totalSeconds %= 3600;
