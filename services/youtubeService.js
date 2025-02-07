@@ -1,26 +1,14 @@
 const axios = require('axios');
 const { extractVideoId, extractPlaylistId } = require('../utils/exetractID');
 const {convertDurationToHour,isoDurationToSeconds} = require('../utils/helpers');
-
+const {rapidapiOptions}=require('../utils/rapidOptions');
 // Fetch video details
 const fetchVideoDetails = async function (url) {
   const videoId = extractVideoId(url);
 
   if (!videoId) throw new Error("Invalid video URL");
-
-  const options = {
-    method: 'GET',
-    url: process.env.rapidapi_VIDEOURL,
-    params: {
-      id: videoId,
-      key: process.env.x_rapidapi_key,
-      part: 'snippet,contentDetails',
-    },
-    headers: {
-      'x-rapidapi-host': process.env.x_rapidapi_host,
-      'x-rapidapi-key': process.env.x_rapidapi_key,
-    },
-  };
+ 
+  const options =  rapidapiOptions(process.env.rapidapi_VIDEOURL,videoId);
 
   try {
     const response = await axios.request(options);
@@ -46,20 +34,8 @@ const fetchVideoDetails = async function (url) {
 const fetchPlaylistDetails = async function (url) {
   const playlistId = extractPlaylistId(url);
   if (!playlistId) throw new Error("Invalid playlist URL");
-
-  const playlistOptions = {
-    method: 'GET',
-    url: process.env.rapidapi_LISTURL,
-    params: {
-      id: playlistId,
-      key: process.env.x_rapidapi_key,
-      part: 'snippet,contentDetails',
-    },
-    headers: {
-      'x-rapidapi-host': process.env.x_rapidapi_host,
-      'x-rapidapi-key': process.env.x_rapidapi_key,
-    },
-  };
+ 
+  const playlistOptions =  rapidapiOptions(process.env.rapidapi_LISTURL,playlistId);
 
   try {
     // Fetch playlist metadata
@@ -81,6 +57,7 @@ const fetchPlaylistDetails = async function (url) {
     let nextPageToken = null;
 
     do {
+
       const videoOptions = {
         method: 'GET',
         url: 'https://youtube-data-api-v33.p.rapidapi.com/playlistItems',
@@ -178,17 +155,17 @@ const checklistAvailability = async function (url) {
     const description = playlistDetails.snippet.description;
     const thumbnailUrl = playlistDetails.snippet.thumbnails.high.url;
 
-  
+  const  videoCount=playlistDetails.contentDetails.itemCount;
 
     return {
       title,
       description,
-      thumbnailUrl
+      thumbnailUrl,
+      videoCount
     };
   } catch (error) {
     return res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
-
 
 module.exports = { fetchVideoDetails, fetchPlaylistDetails ,checklistAvailability};

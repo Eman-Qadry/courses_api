@@ -9,7 +9,8 @@ const topicRouter=require('./routes/admin/topicRouter');
 const userRoute=require('./routes/User/topicRout');
 const sendMessag=require('./routes/User/sendMessage');
 const messageRoute=require('./routes/admin/messageRoute');
-const validateVideos=require('./services/validateVideos');
+const{ checkPlaylists}=require('./services/validateLists')
+
 const cors = require('cors');
 
 dotenv.config();
@@ -48,5 +49,6 @@ app.get('/api/v1/',(req,res,next)=>{
 app.listen('5000',()=>{
     connectDB();
     console.log("server is started");
+     checkPlaylists();
     
 })
