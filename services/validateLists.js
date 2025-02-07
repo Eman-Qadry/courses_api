@@ -51,14 +51,14 @@ const checkPlaylists = async function () {
                             thumbnailUrl: videoDetails.thumbnail,
                             isActive: true,
                             totalHours: videoDetails.duration,
-                            listId: playlist._id,
+                            listId: playlist._id ,
                             topicId:topic._id
                         });
 
                         const newVideo = await videoDoc.save();
                         playlist.video.push(newVideo._id);
                         
-                        // تحديث الوقت الإجمالي الجديد
+                        
                         newTotalHours.hours += newVideo.totalHours.hours;
                         newTotalHours.minutes += newVideo.totalHours.minutes;
                         newTotalHours.seconds += newVideo.totalHours.seconds;

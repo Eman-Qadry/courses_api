@@ -46,7 +46,8 @@ exports.addPlaylists = async (req, res, next) => {
           thumbnailUrl,
           numberOfVideos: videos.length,
           totalHours: totalDuration,
-          url
+          url,
+          topicId:topic._id
         });
 
         const savedList = await newPlaylist.save();
