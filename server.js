@@ -49,6 +49,6 @@ app.get('/api/v1/',(req,res,next)=>{
 app.listen('5000',()=>{
     connectDB();
     console.log("server is started");
-     checkPlaylists();
+   
     
 })
