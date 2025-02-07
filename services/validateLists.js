@@ -21,11 +21,11 @@ const checkPlaylists = async function () {
             console.log(playlistData);
 
             if (!playlistData) {
-                // Playlist is deleted, deactivate it and its videos
-                await Playlist.updateOne({ _id: playlist._id }, { isActive: false });
-                await Video.updateMany({ listId: playlist._id }, { isActive: false });
-
-             await  updateTime(topic,playlist.totalHours,"subtract") 
+              
+             await  updateTime(topic._id,playlist.totalHours,"subtract") 
+  // Playlist is deleted, deactivate it and its videos
+  await Playlist.updateOne({ _id: playlist._id }, { isActive: false });
+  await Video.updateMany({ listId: playlist._id }, { isActive: false });
 
                 console.log(`Playlist ${playlist._id} and its videos have been deactivated.`);
                 continue;
@@ -51,7 +51,8 @@ const checkPlaylists = async function () {
                             thumbnailUrl: videoDetails.thumbnail,
                             isActive: true,
                             totalHours: videoDetails.duration,
-                            listId: playlist
+                            listId: playlist._id,
+                            topicId:topic._id
                         });
 
                         const newVideo = await videoDoc.save();
@@ -80,7 +81,7 @@ const checkPlaylists = async function () {
                 await playlist.save();
 
         
-                await  updateTime(topic,playlist.totalHours,"add") 
+                await  updateTime(topic._id,playlist.totalHours,"add") 
             }
         }
     } catch (error) {
@@ -109,7 +110,7 @@ async function getPlaylistAndVideos(playlistId) {
         const response = await axios.request(options);
 
         if (!response.data.items.length) return null; // Playlist is deleted
-
+console.log("video fetched successfully")
         return {
             videos: response.data.items.map(item => ({
                 videoId: item.snippet.resourceId.videoId
@@ -131,6 +132,7 @@ async function getVideoDetails(videoId) {
 
         const video = response.data.items[0].snippet;
         const isoDuration = response.data.items[0].contentDetails.duration;
+        console.log(video.title)
         return {
             title: video.title,
             description: video.description,
@@ -142,12 +144,13 @@ async function getVideoDetails(videoId) {
         return null;
     }
 }
-async function updateTime(topic,listTime){
+async function updateTime(topicID,listTime,operation){
+  const topic = await Topic.findById(topicID);
   
   let totalSeconds = 
-  topic.actualHours.hours * 3600 + 
-  topic.actualHours.minutes * 60 + 
-  topic.actualHours.seconds;
+  topic.totalHours.hours * 3600 + 
+  topic.totalHours.minutes * 60 + 
+  topic.totalHours.seconds;
 
 let listSeconds = 
 listTime.hours * 3600 + 
@@ -159,10 +162,10 @@ if (operation==="add"){
 else {
   totalSeconds-=listSeconds
 }
-topic.actualHours.hours  = Math.floor(totalSeconds / 3600);
+topic.totalHours.hours  = Math.floor(totalSeconds / 3600);
       totalSeconds %= 3600;
-      topic.actualHours.minutes = Math.floor(totalSeconds / 60);
-      topic.actualHours.seconds = totalSeconds % 60;
+      topic.totalHours.minutes = Math.floor(totalSeconds / 60);
+      topic.totalHours.seconds = totalSeconds % 60;
  
       await topic.save();
 }
