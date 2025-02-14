@@ -24,9 +24,9 @@ const checkPlaylists = async function () {
             if (!playlistData) {
               
              await  updateTime(topic._id,playlist.totalHours,"subtract",playlist.numberOfVideos) 
-  // Playlist is deleted, deactivate it and its videos
-  await Playlist.updateOne({ _id: playlist._id }, { isActive: false });
-  await Video.updateMany({ listId: playlist._id }, { isActive: false });
+             // Playlist is deleted, deactivate it and its videos
+              await Playlist.updateOne({ _id: playlist._id }, { isActive: false });
+              await Video.updateMany({ listId: playlist._id }, { isActive: false });
 
                 console.log(`Playlist ${playlist._id} and its videos have been deactivated.`);
                 continue;
@@ -158,6 +158,7 @@ async function updateTime(topicID,listTime,operation,vidNumber){
   topic.actualHours.hours * 3600 + 
   topic.actualHours.minutes * 60 + 
   topic.actualHours.seconds;
+
 let listSeconds = 
 listTime.hours * 3600 + 
 listTime.minutes * 60 + 

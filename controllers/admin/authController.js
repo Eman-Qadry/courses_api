@@ -3,8 +3,6 @@ const createJWT=require('../../config/JWT');
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-const sendgridtransport=require('nodemailer-sendgrid-transport');
-let transporter;
 
 // admin loggin
 exports.postlogin=async (req,res,next)=>{
@@ -77,11 +75,7 @@ return res.status(500).json({
     //forgot password using email verification
   exports.forgotPassword = async (req, res, next) => {
   
-transporter=nodemailer.createTransport(sendgridtransport({
-  auth:{
-    api_key: process.env.SENDGRID_API_KEY
-  }
-}));
+
           try {
             const { email } = req.body;
         
@@ -104,20 +98,32 @@ transporter=nodemailer.createTransport(sendgridtransport({
         
             await admin.save();
         
-          
-            const resetLink = `${process.env.FRONTEND_URL}/resetpass.html?token=${resetToken}`;
-            const mailOptions = {
-              to: email,
-              from: process.env.EMAIL_USER,
-              subject: 'Reset Your Password',
-              html: `
-                <p>Hi,</p>
-                <p>You requested to reset your password. Click the link below to proceed:</p>
-                <a href="${resetLink}">Reset Password</a>
-                <p>If you did not request this, please ignore this email.</p>
-                <p>The link will expire in 10 minutes.</p>
-              `,
-            };
+
+  const senderEmail = process.env.EMAIL_USER;
+  const senderPassword = process.env.EMAIL_PASSWORD;
+  const resetLink = `${process.env.FRONTEND_URL}/resetpass.html?token=${resetToken}`;
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: senderEmail,
+      pass: senderPassword,
+    },
+  });
+
+
+  const mailOptions = {
+    to: email,
+    from: senderEmail,
+    subject: 'Reset Your Password',
+    html: `
+      <p>Hi,</p>
+      <p>You requested to reset your password. Click the link below to proceed:</p>
+      <a href="${resetLink}">Reset Password</a>
+      <p>If you did not request this, please ignore this email.</p>
+      <p>The link will expire in 10 minutes.</p>
+    `,
+  };
+        
         
             transporter.sendMail(mailOptions, (error, info) => {
               if (error) {

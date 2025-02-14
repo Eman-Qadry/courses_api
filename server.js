@@ -53,6 +53,6 @@ app.listen('5000',()=>{
     
 })
  function scheduleCheckPlaylists() {
-   checkPlaylists();
-  setInterval(scheduleCheckPlaylists, 172800000); // Schedule the next run after 2 days
+  //  checkPlaylists();
+  // setInterval(scheduleCheckPlaylists, 172800000); // Schedule the next run after 2 days
 }
